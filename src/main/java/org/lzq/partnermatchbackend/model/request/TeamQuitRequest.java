@@ -6,16 +6,17 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 用户登录请求体
- *
+ * 用户退出队伍请求体
  */
 @Data
-public class UserLoginRequest implements Serializable {
+public class TeamQuitRequest implements Serializable {
+
     @Serial
     private static final long serialVersionUID = 3191241716373120793L;
 
-    private String userAccount;
+    /**
+     * id
+     */
+    private Long teamId;
 
-
-    private String userPassword;
 }

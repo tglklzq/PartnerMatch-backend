@@ -1,27 +1,22 @@
-package org.lzq.partnermatchbackend.model.domain;
+package org.lzq.partnermatchbackend.model.request;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 用户
- * @TableName user
+ *
  */
-@TableName(value ="user")
 @Data
-public class User implements Serializable {
+public class UserEditRequest implements Serializable {
     /**
      * 用户ID
      */
-    @TableId(type = IdType.AUTO)
-    private Long userId;
+    private Long id;
 
     /**
      * 用户昵称
@@ -61,7 +56,7 @@ public class User implements Serializable {
     /**
      * 标签 json 列表
      */
-    private String tags;
+    private List<String> tags;
 
     /**
      * 个人简介
@@ -92,7 +87,7 @@ public class User implements Serializable {
      * 用户角色(1：管理员 2：普通用户)
      */
     private Integer userRole;
-    @Serial
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 }

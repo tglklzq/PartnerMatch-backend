@@ -1,9 +1,12 @@
 package org.lzq.partnermatchbackend.common;
 
+import lombok.Getter;
+
 /**
  * 错误码
  *
  */
+@Getter
 public enum ErrorCode {
 
     SUCCESS(0, "ok", ""),
@@ -12,6 +15,7 @@ public enum ErrorCode {
     NOT_LOGIN(40100, "未登录", ""),
     NO_AUTH(40101, "无权限", ""),
     FORBIDDEN(40301, "禁止操作", ""),
+    INSERT_ERROR(50001, "插入数据失败", ""),
     SYSTEM_ERROR(50000, "系统内部异常", "");
 
     private final int code;
@@ -32,15 +36,4 @@ public enum ErrorCode {
         this.description = description;
     }
 
-    public int getCode() {
-        return code;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public String getDescription() {
-        return description;
-    }
 }

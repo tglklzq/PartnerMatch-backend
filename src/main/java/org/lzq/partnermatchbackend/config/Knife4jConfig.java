@@ -35,4 +35,5 @@ public class Knife4jConfig {
                 // 配置版本号
                 .version("2.0");
     }
+
 }

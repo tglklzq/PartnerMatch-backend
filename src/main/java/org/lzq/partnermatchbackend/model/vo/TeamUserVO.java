@@ -1,23 +1,22 @@
-package org.lzq.partnermatchbackend.model.domain;
+package org.lzq.partnermatchbackend.model.vo;
 
-import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 队伍
- * @TableName team
+ * 队伍和用户信息封装类（脱敏）
+ *
  */
-@TableName(value ="team")
 @Data
-public class Team implements Serializable {
+public class TeamUserVO implements Serializable {
+
+    private static final long serialVersionUID = 1899063007109226944L;
+
     /**
-     * 队伍ID
+     * id
      */
-    @TableId(type = IdType.AUTO)
     private Long teamId;
 
     /**
@@ -41,22 +40,12 @@ public class Team implements Serializable {
     private Integer maxNum;
 
     /**
-     * 加入人数
-     */
-    private Integer joinNum;
-
-    /**
      * 过期时间
      */
     private Date expireTime;
 
     /**
-     * 创建人ID
-     */
-    private Long creatorId;
-
-    /**
-     * 用户ID
+     * 用户id
      */
     private Long userId;
 
@@ -64,11 +53,6 @@ public class Team implements Serializable {
      * 0 - 公开，1 - 私有，2 - 加密
      */
     private Integer status;
-
-    /**
-     * 房间密码
-     */
-    private String password;
 
     /**
      * 创建时间
@@ -81,12 +65,17 @@ public class Team implements Serializable {
     private Date updateTime;
 
     /**
-     * 是否删除
+     * 创建人用户信息
      */
-    @TableLogic
-    private Integer isDelete;
+    private UserVO createUser;
 
-    @TableField(exist = false)
-    @Serial
-    private static final long serialVersionUID = 1L;
+    /**
+     * 已加入的用户数
+     */
+    private Integer joinNum;
+
+    /**
+     * 是否已加入队伍
+     */
+    private boolean hasJoin = false;
 }

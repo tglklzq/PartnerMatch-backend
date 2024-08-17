@@ -5,28 +5,28 @@
 <mapper namespace="org.lzq.partnermatchbackend.mapper.UserMapper">
 
     <resultMap id="BaseResultMap" type="org.lzq.partnermatchbackend.model.domain.User">
-            <id property="id" column="id" jdbcType="BIGINT"/>
-            <result property="username" column="username" jdbcType="VARCHAR"/>
-            <result property="useraccount" column="userAccount" jdbcType="VARCHAR"/>
-            <result property="avatarurl" column="avatarUrl" jdbcType="VARCHAR"/>
-            <result property="gender" column="gender" jdbcType="TINYINT"/>
-            <result property="userpassword" column="userPassword" jdbcType="VARCHAR"/>
-            <result property="phone" column="phone" jdbcType="VARCHAR"/>
-            <result property="email" column="email" jdbcType="VARCHAR"/>
-            <result property="userstatus" column="userStatus" jdbcType="INTEGER"/>
-            <result property="createtime" column="createTime" jdbcType="TIMESTAMP"/>
-            <result property="updatetime" column="updateTime" jdbcType="TIMESTAMP"/>
-            <result property="isdelete" column="isDelete" jdbcType="TINYINT"/>
-            <result property="userrole" column="userRole" jdbcType="INTEGER"/>
-            <result property="planetcode" column="planetCode" jdbcType="VARCHAR"/>
-            <result property="tags" column="tags" jdbcType="VARCHAR"/>
+        <id property="userId" column="user_id" jdbcType="BIGINT"/>
+        <result property="username" column="username" jdbcType="VARCHAR"/>
+        <result property="userAccount" column="user_account" jdbcType="VARCHAR"/>
+        <result property="avatarUrl" column="avatar_url" jdbcType="VARCHAR"/>
+        <result property="gender" column="gender" jdbcType="TINYINT"/>
+        <result property="userPassword" column="user_password" jdbcType="VARCHAR"/>
+        <result property="phone" column="phone" jdbcType="VARCHAR"/>
+        <result property="email" column="email" jdbcType="VARCHAR"/>
+        <result property="tags" column="tags" jdbcType="VARCHAR"/>
+        <result property="profile" column="profile" jdbcType="VARCHAR"/>
+        <result property="userStatus" column="user_status" jdbcType="TINYINT"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="isDelete" column="is_delete" jdbcType="TINYINT"/>
+        <result property="userRole" column="user_role" jdbcType="INTEGER"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,username,userAccount,
-        avatarUrl,gender,userPassword,
-        phone,email,userStatus,
-        createTime,updateTime,isDelete,
-        userRole,planetCode,tags
+        user_id,username,user_account,
+        avatar_url,gender,user_password,
+        phone,email,tags,
+        profile,user_status,create_time,
+        update_time,is_delete,user_role
     </sql>
 </mapper>

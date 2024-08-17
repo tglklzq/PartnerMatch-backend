@@ -1,4 +1,4 @@
-package org.lzq.partnermatchbackend.common;
+package org.lzq.partnermatchbackend.model.request;
 
 import lombok.Data;
 
@@ -13,7 +13,7 @@ import java.io.Serializable;
 public class DeleteRequest implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = -5860707094194210842L;
+    private static final long serialVersionUID = -5850245444195057623L;
 
     private long id;
 }

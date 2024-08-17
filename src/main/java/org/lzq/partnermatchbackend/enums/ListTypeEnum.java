@@ -1,21 +1,26 @@
-package org.lzq.partnermatchbackend.model.enums;
+package org.lzq.partnermatchbackend.enums;
 
-public enum TeamStatusEnum {
+/**
+ * 集合状态枚举
+ */
+public enum ListTypeEnum {
 
-    PUBLIC(0, "公开"),
-    PRIVATE(1, "私有"),
-    SECRET(2, "加密");
-
+    MIXEECAE(0, "中英文混合"),
+    CHINESE(1, "纯中文"),
+    ENGLISH(2, "纯英文"),
+    ENGLISHAOTHER(3, "英文和其他字符");
     private int value;
 
     private String text;
 
-    public static TeamStatusEnum getEnumByValue(Integer value) {
+    public static ListTypeEnum getEnumByValue(Integer value) {
         if (value == null) {
             return null;
         }
-        TeamStatusEnum[] values = TeamStatusEnum.values();
-        for (TeamStatusEnum teamStatusEnum : values) {
+        //values():返回所有枚举类对象构成的数组
+        ListTypeEnum[] values = ListTypeEnum.values();
+        //遍历这个数组
+        for (ListTypeEnum teamStatusEnum : values) {
             if (teamStatusEnum.getValue() == value) {
                 return teamStatusEnum;
             }
@@ -23,7 +28,7 @@ public enum TeamStatusEnum {
         return null;
     }
 
-    TeamStatusEnum(int value, String text) {
+    ListTypeEnum(int value, String text) {
         this.value = value;
         this.text = text;
     }

@@ -4,7 +4,7 @@ package org.lzq.partnermatchbackend.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.lzq.partnermatchbackend.common.BaseResponse;
 import org.lzq.partnermatchbackend.common.ErrorCode;
-import org.lzq.partnermatchbackend.common.ResultUtils;
+import org.lzq.partnermatchbackend.utils.ResultUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
