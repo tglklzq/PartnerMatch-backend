@@ -176,12 +176,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return 1;
     }
 
-    /**
-     * 根据标签搜索用户（内存过滤）
-     *
-     * @param tagNameList 用户要拥有的标签
-     * @return
-     */
+
+
     /**
      * 根据标签搜索用户 (SQL分页查询版)
      *
@@ -348,10 +344,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
         // 分页查询
         Page<User> userPage = this.page(new Page<>(pageNum, pageSize), queryWrapper);
-        List<User> collect = userPage.getRecords().stream().map(this::getSafetyUser).collect(Collectors.toList());
-        userPage.setRecords(collect);
+        List<User> allUsers = userPage.getRecords();
 
-        return userPage.getRecords();
+        // 4. 筛选在线用户
+
+        return allUsers.stream()
+                .filter(user -> request.getSession().getAttribute(USER_LOGIN_STATE) != null)
+                .map(this::getSafetyUser)
+                .collect(Collectors.toList());
     }
 
     private String getRandomTagFromUser(User user) {
