@@ -26,7 +26,7 @@ public class Knife4jConfig {
                 // 配置文档描述
                 .description("伙伴匹配接口文档")
                 // 配置作者信息
-                .contact(new Contact().name("梁志权").url("https://www.github/tglklzq.com").email("1298848072@qq.com"))
+                .contact(new Contact().name("lzq").url("https://www.github/tglklzq.com").email("1298848072@qq.com"))
                 // 配置License许可证信息
                 .license(new License().name("Apache 2.0").url("https://www.github/tglklzq.com"))
                 // 概述信息

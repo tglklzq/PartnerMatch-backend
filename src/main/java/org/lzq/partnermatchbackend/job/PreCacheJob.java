@@ -52,7 +52,7 @@ public class PreCacheJob {
                     // 查数据库
                     Page<User> userPage = userService.page(new Page<>(1, 20), new QueryWrapper<>());
                     // 获取当前用户
-                    String redisKey = String.format("awei:user:recommond:%s", userId);
+                    String redisKey = String.format("match:user:recommond:%s", userId);
                     // 写缓存
                     try {
                         redisUtils.set(redisKey, userPage, 30);
