@@ -67,6 +67,10 @@ public class User implements Serializable {
      * 个人简介
      */
     private String profile;
+    /**
+     * ip地址
+     */
+    private String ip;
 
     /**
      * 用户状态 (0：正常 )

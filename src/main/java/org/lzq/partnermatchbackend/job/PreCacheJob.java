@@ -36,14 +36,14 @@ public class PreCacheJob {
     /**
      * 重点用户
      */
-    private List<Long> mainUserList = Collections.singletonList(28L);
+    private final List<Long> mainUserList = Collections.singletonList(28L);
 
     /**
      * 每天执行，预热推荐用户
      */
     @Scheduled(cron = "0 58 23 * * *")
     public void doCacheRecommendUser() {
-        RLock lock = redissonClient.getLock("yupao:precachejob:docache:lock");
+        RLock lock = redissonClient.getLock("match:precachejob:docache:lock");
         try {
             // 尝试获取锁，只有一个线程可以获取到锁
             if (lock.tryLock(0, -1, TimeUnit.MILLISECONDS)) {

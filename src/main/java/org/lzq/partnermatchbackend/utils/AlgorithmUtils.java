@@ -3,8 +3,10 @@ package org.lzq.partnermatchbackend.utils;
 import org.lzq.partnermatchbackend.enums.ListTypeEnum;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.lzq.partnermatchbackend.enums.ListTypeEnum.ENGLISH;
@@ -16,6 +18,21 @@ import static org.lzq.partnermatchbackend.enums.ListTypeEnum.MIXEECAE;
  *
  */
 public class AlgorithmUtils {
+    /**
+     * Jaccard相似度
+     * @param list1
+     * @param list2
+     * @return
+     */
+    private double jaccardSimilarity(List<String> list1, List<String> list2) {
+        Set<String> set1 = new HashSet<>(list1);
+        Set<String> set2 = new HashSet<>(list2);
+        Set<String> intersection = new HashSet<>(set1);
+        intersection.retainAll(set2);
+        Set<String> union = new HashSet<>(set1);
+        union.addAll(set2);
+        return (double) intersection.size() / union.size();
+    }
 
     /**
      * 编辑距离算法（用于计算最相似的两组标签）

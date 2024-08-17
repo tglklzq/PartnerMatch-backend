@@ -22,13 +22,16 @@ import org.lzq.partnermatchbackend.mapper.UserMapper;
 import org.lzq.partnermatchbackend.model.domain.User;
 import org.lzq.partnermatchbackend.model.request.*;
 import org.lzq.partnermatchbackend.service.UserService;
+import org.lzq.partnermatchbackend.utils.AddressUtils;
 import org.lzq.partnermatchbackend.utils.AlgorithmUtils;
+import org.lzq.partnermatchbackend.utils.DesensitizationUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -50,7 +53,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     /**
      * 盐值，混淆密码
      */
-    private static final String SALT = "yupi";
+    private static final String SALT = "candy-ling";
 
     @Override
     public Boolean userRegister(UserRegisterRequest requestParam) {
@@ -130,6 +133,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             log.info("user login failed, userAccount cannot match userPassword");
             return null;
         }
+        // 获取 IP 地址
+        String ip = AddressUtils.getIpAddr(request);
+        user.setIp(ip);
+        userMapper.updateById(user);
         // 3. 用户脱敏
         User safetyUser = getSafetyUser(user);
         // 4. 记录用户的登录态
@@ -150,19 +157,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         User safeUser = new User();
         safeUser.setUserId(originUser.getUserId());
-        safeUser.setUsername(originUser.getUsername());
+        safeUser.setUsername(DesensitizationUtils.desensitizeUsername(originUser.getUsername()));
         safeUser.setUserAccount(originUser.getUserAccount());
         safeUser.setAvatarUrl(originUser.getAvatarUrl());
         safeUser.setGender(originUser.getGender());
-        safeUser.setPhone(originUser.getPhone());
-        safeUser.setEmail(originUser.getEmail());
+        safeUser.setPhone(DesensitizationUtils.desensitizePhone(originUser.getPhone()));
+        safeUser.setEmail(DesensitizationUtils.desensitizeEmail(originUser.getEmail()));
         safeUser.setProfile(originUser.getProfile());
+        safeUser.setIp(DesensitizationUtils.desensitizeIp(originUser.getIp()));
         safeUser.setUserRole(originUser.getUserRole());
         safeUser.setUserStatus(originUser.getUserStatus());
         safeUser.setCreateTime(originUser.getCreateTime());
         safeUser.setTags(originUser.getTags());
         return safeUser;
     }
+
 
     /**
      * 用户注销
@@ -263,55 +272,60 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return loginUser != null && loginUser.getUserRole() == UserConstant.ADMIN_ROLE;
     }
 
+    /**
+     * 伙伴匹配 使用的是Jaccard相似度
+     * @param num
+     * @param loginUser
+     * @return
+     */
     @Override
     public List<User> matchUsers(long num, User loginUser) {
-
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.select("user_id", "tags");
         queryWrapper.isNotNull("tags");
         List<User> userList = this.list(queryWrapper);
         String tags = loginUser.getTags();
         Gson gson = new Gson();
-        List<String> tagList = gson.fromJson(tags, new TypeToken<List<String>>() {
-        }.getType());
-        // 用户列表的下标 => 相似度
-        List<Pair<User, Long>> list = new ArrayList<>();
-        // 依次计算所有用户和当前用户的相似度
-        for (int i = 0; i < userList.size(); i++) {
-            User user = userList.get(i);
+        List<String> tagList = gson.fromJson(tags, new TypeToken<List<String>>() {}.getType());
+
+        PriorityQueue<Pair<User, Double>> maxHeap = new PriorityQueue<>(Comparator.comparingDouble(Pair::getValue));
+
+        for (User user : userList) {
             String userTags = user.getTags();
-            // 无标签或者为当前用户自己
             if (StringUtils.isBlank(userTags) || Objects.equals(user.getUserId(), loginUser.getUserId())) {
                 continue;
             }
-            List<String> userTagList = gson.fromJson(userTags, new TypeToken<List<String>>() {
-            }.getType());
-            // 计算分数
-            long distance = AlgorithmUtils.minDistance(tagList, userTagList);
-            list.add(new Pair<>(user, distance));
+            List<String> userTagList = gson.fromJson(userTags, new TypeToken<List<String>>() {}.getType());
+            double similarity=AlgorithmUtils.minDistance(tagList, userTagList);
+            if (maxHeap.size() < num) {
+                maxHeap.add(new Pair<>(user, similarity));
+            } else if (maxHeap.peek() != null && similarity > maxHeap.peek().getValue()) {
+                maxHeap.poll();
+                maxHeap.add(new Pair<>(user, similarity));
+            }
         }
-        // 按编辑距离由小到大排序
-        List<Pair<User, Long>> topUserPairList = list.stream()
-                .sorted((a, b) -> (int) (a.getValue() - b.getValue()))
-                .limit(num)
-                .toList();
-        // 原本顺序的 userId 列表
-        List<Long> userIdList = topUserPairList.stream().map(pair -> pair.getKey().getUserId()).collect(Collectors.toList());
+
+        List<Long> userIdList = maxHeap.stream()
+                .map(pair -> pair.getKey().getUserId())
+                .collect(Collectors.toList());
+
+        if (userIdList.isEmpty()) {
+            return new ArrayList<>();
+        }
+
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
         userQueryWrapper.in("user_id", userIdList);
-        // 1, 3, 2
-        // User1、User2、User3
-        // 1 => User1, 2 => User2, 3 => User3
-        Map<Long, List<User>> userIdUserListMap = this.list(userQueryWrapper)
-                .stream()
+        Map<Long, User> userIdUserMap = this.list(userQueryWrapper).stream()
                 .map(this::getSafetyUser)
-                .collect(Collectors.groupingBy(User::getUserId));
-        List<User> finalUserList = new ArrayList<>();
-        for (Long userId : userIdList) {
-            finalUserList.add(userIdUserListMap.get(userId).get(0));
-        }
-        return finalUserList;
+                .collect(Collectors.toMap(User::getUserId, Function.identity()));
+
+        return userIdList.stream()
+                .map(userIdUserMap::get)
+                .collect(Collectors.toList());
     }
+
+
+
 
     /**
      * 首页用户推荐
@@ -323,21 +337,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      */
     @Override
     public List<User> recommendUsers(long pageSize, long pageNum, HttpServletRequest request) {
-        // 1. 获取当前用户
+        // 获取当前用户
         User loginUser = getLoginUser(request);
         if (loginUser == null) {
             return Collections.emptyList();
         }
 
-        // 2. 随机获取当前用户的一个标签
+        // 获取当前用户的地理位置
+        String location = AddressUtils.getAddress(loginUser.getIp());
+
+        // 随机获取当前用户的一个标签
         String randomTag = getRandomTagFromUser(loginUser);
 
-        // 3. 查询匹配该标签的用户
+        // 查询匹配该标签的用户
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        // 排除当前用户
         queryWrapper.ne("user_id", loginUser.getUserId());
-
-        // 根据随机选择的标签进行匹配查询
         if (randomTag != null) {
             queryWrapper.like("tags", randomTag);
         }
@@ -346,13 +360,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         Page<User> userPage = this.page(new Page<>(pageNum, pageSize), queryWrapper);
         List<User> allUsers = userPage.getRecords();
 
-        // 4. 筛选在线用户
+        // 根据地理位置进行筛选和排序
 
         return allUsers.stream()
-                .filter(user -> request.getSession().getAttribute(USER_LOGIN_STATE) != null)
+                .filter(user -> {
+                    if (location != null) {
+                        return Objects.requireNonNull(AddressUtils.getAddress(user.getIp())).contains(location);
+                    }
+                    return false;
+                })
                 .map(this::getSafetyUser)
                 .collect(Collectors.toList());
     }
+
 
     private String getRandomTagFromUser(User user) {
         String tags = user.getTags(); // 从数据库中获取标签字段
