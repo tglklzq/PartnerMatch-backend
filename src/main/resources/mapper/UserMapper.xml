@@ -15,7 +15,7 @@
         <result property="email" column="email" jdbcType="VARCHAR"/>
         <result property="tags" column="tags" jdbcType="VARCHAR"/>
         <result property="profile" column="profile" jdbcType="VARCHAR"/>
-        <result property="ip" column="ip" jdbcType="VARCHAR"/>
+        <result property="location" column="location" jdbcType="VARCHAR"/>
         <result property="userStatus" column="user_status" jdbcType="TINYINT"/>
         <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
         <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
@@ -27,7 +27,7 @@
         user_id,username,user_account,
         avatar_url,gender,user_password,
         phone,email,tags,
-        profile,user_status,create_time,
+        profile,location,user_status,create_time,
         update_time,is_delete,user_role
     </sql>
 </mapper>

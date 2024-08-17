@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -65,25 +66,28 @@ public class AddressUtils {
             conn.setConnectTimeout(6000);
             conn.setInstanceFollowRedirects(false);
             int code = conn.getResponseCode();
-            StringBuilder sb = new StringBuilder();
-            List<String> list = new ArrayList<>();
-            if (code == 200) {
-                InputStream in = conn.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(in, "GBK"));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-                list.add(sb.substring(sb.indexOf("ip") + 5, sb.indexOf("pro") - 3));
-                String pro = sb.substring(sb.indexOf("pro") + 6, sb.indexOf("proCode") - 3);
-                String city = sb.substring(sb.indexOf("city") + 7, sb.indexOf("cityCode") - 3);
-                list.add(pro+city);
-            }
-            return list;
+            return getStrings(code, conn);
         } catch (Exception e) {
-            e.printStackTrace();
             return null;
         }
+    }
+
+    private static List<String> getStrings(int code, HttpURLConnection conn) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        List<String> list = new ArrayList<>();
+        if (code == 200) {
+            InputStream in = conn.getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in, "GBK"));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+            //list.add(sb.substring(sb.indexOf("ip") + 5, sb.indexOf("pro") - 3)); //ip地址数据
+            String pro = sb.substring(sb.indexOf("pro") + 6, sb.indexOf("proCode") - 3);
+            String city = sb.substring(sb.indexOf("city") + 7, sb.indexOf("cityCode") - 3);
+            list.add(pro+city);
+        }
+        return list;
     }
 
 

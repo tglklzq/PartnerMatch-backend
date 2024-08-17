@@ -32,7 +32,6 @@ class AddressUtilsTest {
                 while ((line = reader.readLine()) != null) {
                     sb.append(line);
                 }
-                list.add(sb.substring(sb.indexOf("ip") + 5, sb.indexOf("pro") - 3));
                 String pro = sb.substring(sb.indexOf("pro") + 6, sb.indexOf("proCode") - 3);
                 String city = sb.substring(sb.indexOf("city") + 7, sb.indexOf("cityCode") - 3);
                 list.add(pro+city);

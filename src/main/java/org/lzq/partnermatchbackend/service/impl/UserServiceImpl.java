@@ -134,8 +134,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             return null;
         }
         // 获取 IP 地址
-        String ip = AddressUtils.getIpAddr(request);
-        user.setIp(ip);
+        String location = Objects.requireNonNull(AddressUtils.getIp()).toString();
+        user.setLocation(location);
         userMapper.updateById(user);
         // 3. 用户脱敏
         User safetyUser = getSafetyUser(user);
@@ -157,14 +157,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         User safeUser = new User();
         safeUser.setUserId(originUser.getUserId());
-        safeUser.setUsername(DesensitizationUtils.desensitizeUsername(originUser.getUsername()));
+        safeUser.setUsername(originUser.getUsername());
         safeUser.setUserAccount(originUser.getUserAccount());
         safeUser.setAvatarUrl(originUser.getAvatarUrl());
         safeUser.setGender(originUser.getGender());
         safeUser.setPhone(DesensitizationUtils.desensitizePhone(originUser.getPhone()));
         safeUser.setEmail(DesensitizationUtils.desensitizeEmail(originUser.getEmail()));
         safeUser.setProfile(originUser.getProfile());
-        safeUser.setIp(DesensitizationUtils.desensitizeIp(originUser.getIp()));
+        safeUser.setLocation(originUser.getLocation());
         safeUser.setUserRole(originUser.getUserRole());
         safeUser.setUserStatus(originUser.getUserStatus());
         safeUser.setCreateTime(originUser.getCreateTime());
@@ -281,7 +281,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Override
     public List<User> matchUsers(long num, User loginUser) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.select("user_id", "tags");
+        queryWrapper.select("user_id", "tags","location");
         queryWrapper.isNotNull("tags");
         List<User> userList = this.list(queryWrapper);
         String tags = loginUser.getTags();
@@ -337,21 +337,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      */
     @Override
     public List<User> recommendUsers(long pageSize, long pageNum, HttpServletRequest request) {
-        // 获取当前用户
+        // 1. 获取当前用户
         User loginUser = getLoginUser(request);
         if (loginUser == null) {
             return Collections.emptyList();
         }
 
-        // 获取当前用户的地理位置
-        String location = AddressUtils.getAddress(loginUser.getIp());
-
-        // 随机获取当前用户的一个标签
+        // 2. 随机获取当前用户的一个标签
         String randomTag = getRandomTagFromUser(loginUser);
 
-        // 查询匹配该标签的用户
+        // 3. 查询匹配该标签的用户
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        // 排除当前用户
         queryWrapper.ne("user_id", loginUser.getUserId());
+
+        // 根据随机选择的标签进行匹配查询
         if (randomTag != null) {
             queryWrapper.like("tags", randomTag);
         }
@@ -360,15 +360,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         Page<User> userPage = this.page(new Page<>(pageNum, pageSize), queryWrapper);
         List<User> allUsers = userPage.getRecords();
 
-        // 根据地理位置进行筛选和排序
+        // 4. 筛选在线用户
 
         return allUsers.stream()
-                .filter(user -> {
-                    if (location != null) {
-                        return Objects.requireNonNull(AddressUtils.getAddress(user.getIp())).contains(location);
-                    }
-                    return false;
-                })
+                .filter(user -> request.getSession().getAttribute(USER_LOGIN_STATE) != null)
                 .map(this::getSafetyUser)
                 .collect(Collectors.toList());
     }

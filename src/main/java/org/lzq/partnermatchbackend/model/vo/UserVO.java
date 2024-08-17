@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 用户包装类（脱敏）
+ * 用户包装类
  */
 @Data
 public class UserVO implements Serializable {
@@ -50,6 +50,11 @@ public class UserVO implements Serializable {
      * 标签列表 json
      */
     private String tags;
+
+    /**
+     * 位置
+     */
+    private String location;
 
     /**
      * 状态 0 - 正常

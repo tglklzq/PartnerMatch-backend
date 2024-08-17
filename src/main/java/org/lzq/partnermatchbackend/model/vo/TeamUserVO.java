@@ -2,16 +2,18 @@ package org.lzq.partnermatchbackend.model.vo;
 
 import lombok.Data;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 队伍和用户信息封装类（脱敏）
+ * 队伍和用户信息封装类
  *
  */
 @Data
 public class TeamUserVO implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1899063007109226944L;
 
     /**
